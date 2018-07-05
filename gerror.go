@@ -4,9 +4,15 @@
 
 package gerror
 
+import (
+	"fmt"
+	"encoding/json"
+)
+
 type ErrorCoder interface {
 	error
 	Code() string
+	Json() string
 }
 
 type codeError struct {
@@ -20,6 +26,12 @@ func (e *codeError) Code() string {
 
 func (e *codeError) Error() string {
 	return e.error
+}
+
+func (e *codeError) Json() string {
+	c, _ := json.Marshal(e.code)
+	r, _ := json.Marshal(e.error)
+	return fmt.Sprintf("{\"code\":%v,\"error\":%v}", string(c), string(r))
 }
 
 func NewCodeError(code, error string) *codeError {
@@ -42,7 +54,7 @@ var (
 	ErrContentTypeUnsupported = NewCodeError("E1101", "HTTP Header Content-Type 错误")
 	ErrTimeout                = NewCodeError("E1102", "请求超时错误")
 	ErrFrequently             = NewCodeError("E1103", "请求过于频繁")
-	ErrIPForbidden            = NewCodeError("E1104", " 禁止IP地址访问")
+	ErrIPForbidden            = NewCodeError("E1104", "禁止IP地址访问")
 	ErrValueRequired          = NewCodeError("E2000", "必填项检查")
 	ErrUniqueConstraint       = NewCodeError("E2001", "唯一性检查错误")
 	ErrValueInvalid           = NewCodeError("E2002", "有效性检查错误")

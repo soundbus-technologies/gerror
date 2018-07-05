@@ -8,6 +8,7 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/soundbus-technologies/gerror"
+	"fmt"
 )
 
 func TestGerror(t *testing.T) {
@@ -17,6 +18,9 @@ func TestGerror(t *testing.T) {
 
 	assert.Equal(t, "E1234", err.Code())
 	assert.Equal(t, "test error", err.Error())
+
+	assert.Equal(t, "test error", fmt.Sprint(err))
+	assert.Equal(t, "{\"code\":\"E1234\",\"error\":\"test error\"}", err.Json())
 
 	checkError(t, err)
 }
