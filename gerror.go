@@ -4,41 +4,79 @@
 
 package gerror
 
-import (
-	"fmt"
-	"encoding/json"
-)
+import "encoding/json"
 
-type ErrorCoder interface {
+type CodeError interface {
 	error
 	Code() string
-	Json() string
+	Msg() string
 }
 
-type codeError struct {
-	code  string
-	error string
+type serror struct {
+	errCode string
+	errMsg  string
 }
 
-func (e *codeError) Code() string {
-	return e.code
+func (e *serror) Code() string {
+	return e.errCode
 }
 
-func (e *codeError) Error() string {
-	return e.error
+func (e *serror) Msg() string {
+	return e.errMsg
 }
 
-func (e *codeError) Json() string {
-	c, _ := json.Marshal(e.code)
-	r, _ := json.Marshal(e.error)
-	return fmt.Sprintf("{\"code\":%v,\"error\":%v}", string(c), string(r))
+func (e *serror) Error() string {
+	return e.errCode + ":" + e.errMsg
 }
 
-func New(code, error string) *codeError {
-	return &codeError{
-		code:  code,
-		error: error,
+type ServiceError struct {
+	Status      int    `json:"status"`
+	ErrCode     string `json:"errCode"`
+	ErrMsg      string `json:"errMsg,omitempty"`
+	DevMsg      string `json:"devMsg,omitempty"`
+	MoreInfoUrl string `json:"moreInfoUrl,omitempty"`
+	RequestId   string `json:"requestId,omitempty"`
+}
+
+func (e *ServiceError) Code() string {
+	return e.ErrCode
+}
+
+func (e *ServiceError) Msg() string {
+	return e.ErrMsg
+}
+
+func (e *ServiceError) Error() string {
+	if b, err := json.Marshal(e); err == nil {
+		return string(b)
 	}
+	return e.ErrCode + ":" + e.ErrMsg
+}
+
+func New(code, error string) *serror {
+	return &serror{
+		errCode: code,
+		errMsg:  error,
+	}
+}
+
+func NewServiceError(status int, errCode, errMsg, devMsg, infoUrl, requestId string) *ServiceError {
+	return &ServiceError{
+		Status:      status,
+		ErrCode:     errCode,
+		ErrMsg:      errMsg,
+		DevMsg:      devMsg,
+		MoreInfoUrl: infoUrl,
+		RequestId:   requestId,
+	}
+}
+
+func NewServiceCodeError(codeErr CodeError, status int, devMsg string) *ServiceError {
+	return NewServiceDetailError(codeErr, status, devMsg, "", "")
+}
+
+func NewServiceDetailError(codeErr CodeError, status int, devMsg, infoUrl, requestId string) *ServiceError {
+	return NewServiceError(status, codeErr.Code(), codeErr.Msg(), devMsg, infoUrl, requestId)
 }
 
 // see http://docs.oifitech.com/pages/viewpage.action?pageId=3539165

@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/soundbus-technologies/gerror"
 	"fmt"
+	"net/http"
 )
 
 func TestGerror(t *testing.T) {
@@ -17,12 +18,20 @@ func TestGerror(t *testing.T) {
 	err := gerror.New("E1234", "test error")
 
 	assert.Equal(t, "E1234", err.Code())
-	assert.Equal(t, "test error", err.Error())
+	assert.Equal(t, "test error", err.Msg())
 
-	assert.Equal(t, "test error", fmt.Sprint(err))
-	assert.Equal(t, "{\"code\":\"E1234\",\"error\":\"test error\"}", err.Json())
-
+	assert.Equal(t, "E1234:test error", fmt.Sprint(err))
 	checkError(t, err)
+
+	serviceErr := gerror.NewServiceCodeError(err, http.StatusBadRequest, "parameter required")
+	assert.Equal(t, "E1234", serviceErr.ErrCode)
+	assert.Equal(t, "test error", serviceErr.ErrMsg)
+
+	serrString := fmt.Sprint(serviceErr)
+
+	assert.Equal(t, "{\"status\":400,\"errCode\":\"E1234\",\"errMsg\":\"test error\",\"devMsg\":\"parameter required\"}", serrString)
+	checkError(t, serviceErr)
+
 }
 
 func checkError(t *testing.T, e interface{}) {
