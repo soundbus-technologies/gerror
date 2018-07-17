@@ -99,4 +99,8 @@ var (
 	ErrValueUnsupported       = New("E2003", "无效值检查错误")
 	ErrTypeInvalid            = New("E2004", "类型检查错误")
 	ErrNotFound               = New("E2005", "无法找到对象")
+	ErrUnauthorized           = New("E10001", "未经过授权")
+	ErrAccessDeny             = New("E10003", "无权限访问某资源")
+	ErrIncorrectKeySecret     = New("E10102", "客户端key/secret错误")
+	ErrTokenExpired           = New("E10104", "请求Token已过期")
 )
