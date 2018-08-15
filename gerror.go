@@ -103,4 +103,5 @@ var (
 	ErrAccessDeny             = New("E10003", "无权限访问某资源")
 	ErrIncorrectKeySecret     = New("E10102", "客户端key/secret错误")
 	ErrTokenExpired           = New("E10104", "请求Token已过期")
+	Success                   = New("SUCCESS", "Success")
 )
